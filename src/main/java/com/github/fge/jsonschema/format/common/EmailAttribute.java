@@ -19,6 +19,9 @@
 
 package com.github.fge.jsonschema.format.common;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.github.fge.jackson.NodeType;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
@@ -26,9 +29,6 @@ import com.github.fge.jsonschema.format.AbstractFormatAttribute;
 import com.github.fge.jsonschema.format.FormatAttribute;
 import com.github.fge.jsonschema.processors.data.FullData;
 import com.github.fge.msgsimple.bundle.MessageBundle;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 
 /**
  * Validator for the {@code email} format attribute.
@@ -61,11 +61,31 @@ public final class EmailAttribute
     {
         final String value = data.getInstance().getNode().textValue();
 
-        try {
-            new InternetAddress(value, true);
-        } catch (AddressException ignored) {
-            report.error(newMsg(data, bundle, "err.format.invalidEmail")
-                .putArgument("value", value));
-        }
+        if (!checkEmail(value)) {
+        	 report.error(newMsg(data, bundle, "err.format.invalidEmail")
+                     .putArgument("value", value));
+		}
+//        try {
+//            new InternetAddress(value, true);
+//        } catch (AddressException ignored) {
+//           
+//        }
+    }
+    /**
+     * 验证邮箱
+     * @param email
+     * @return
+     */
+    private boolean checkEmail(String email){
+        boolean flag = false;
+        try{
+                String check = "^([a-z0-9A-Z]+[-|_|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
+                Pattern regex = Pattern.compile(check);
+                Matcher matcher = regex.matcher(email);
+                flag = matcher.matches();
+            }catch(Exception e){
+                flag = false;
+            }
+        return flag;
     }
 }
